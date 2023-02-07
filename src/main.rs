@@ -1,8 +1,8 @@
 #![allow(non_snake_case)]
 
-use std::vec;
+//#![allow(unused_assignments)]
 
-//Starting variables
+//constants
 const SCREENSIZE_X: i32 = 160; 
 const SCREENSIZE_Y: i32 = 45; 
 const BOTAMOUNT: i32 = 2;
@@ -23,34 +23,33 @@ fn main() {
             print!("_")
         }
         
-        
+        let mut bot_found: bool = false;
+
         for y in 0..SCREENSIZE_Y {
             println!("");
             //print!("{}",SCREENSIZE_Y-y);
             print!("|");
             for x in 0..SCREENSIZE_X {
-                let mut dot_printed = false;
-                
+                bot_found = false;
                 for i in 0..BOTAMOUNT {
                     let bot = bot_list[i as usize];
-                    let posx = bot.x;
                     let posy = SCREENSIZE_Y - bot.y;
+                    let posx = bot.x;
                     if posx == x && posy == y {
-                        print!("x");
+                        print!("@");
+                        bot_found = true;
                         break;
                     }
-                
-                    if !dot_printed {
-                        print!(".");
-                        dot_printed = true
-                    }
+                }
+                if !bot_found {
+                    print!(".");
                 }
             }
         }
         println!()
     }
-    let bot1 = Position{x:1,y:5};
-    let bot2 = Position{x:2,y:4};
+    let bot1 = Position{x:16,y:4};
+    let bot2 = Position{x:4,y:2};
     let bot_list = vec![bot1,bot2];
     println!("{:?}",bot_list);
     
