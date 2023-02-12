@@ -1,13 +1,13 @@
 #![allow(non_snake_case)]
 
 #![allow(unused_assignments)]
-use std::{thread, time};
+use std::{thread, time, vec, io::{stdin,stdout,Write},};
 
 use rand::Rng;
 //constants
 const SCREENSIZE_X: i32 = 160; 
 const SCREENSIZE_Y: i32 = 45; 
-const BOTAMOUNT: i32 = 2;
+const SPEED: f64 = 0.9; 
 
 #[derive(Debug,Copy,Clone)]
 struct Position {
@@ -16,81 +16,100 @@ struct Position {
 }
 
 fn main() {
+    let mut bot_list = vec![Position{x:0,y:0},Position{x:0,y:0}];
     let mut rng = rand::thread_rng();
 
     println!("Hello, world!");
-    fn pathfinding(bot_list: &Vec<Position>) {
+    fn pathfinding(bot_list: &[Position]) -> Vec<Position> {
+
+        for i in bot_list.iter(){
+            println!("Hello from original bot_list {:?}",i)
+        }
+
+        let bot = bot_list;
         
-        for i in 1..BOTAMOUNT {
-            let ax = bot_list[i as usize].x;
-            let ay = bot_list[i as usize].y;
+            let ax = bot[0].x as f64;
+            let ay = bot[0].y as f64;
             
-            let bx = bot_list[1-(i as usize)].x;
-            let by = bot_list[1-(i as usize)].y;
+            let bx = bot[1].x as f64;
+            let by = bot[1].y as f64;
             
 
-            let bot_list = vec![Position{x:0,y:0},Position{x:0,y:0}];
-            update_screen(&bot_list);
+            let bot = vec![Position{x:(SPEED*ax+bx-ax).round() as i32,y:(SPEED*ay+by-ay).round() as i32},Position{x:bx.round() as i32,y:by.round() as i32}];
+            update_screen(&bot);
             println!("Hello from pathfinding!!");
-            println!("{:?}",(bx,by));
-            println!("{:?}",(ax,ay));
-            //vec = ((p2x-p1x),(p2y-p1y))
+        return bot.to_vec();
+    }
+    
+    fn update_screen(bot_list: &Vec<Position>) {
+        let delay = time::Duration::from_millis(500);
+        //this is where the board updates from bot positions
+
+        print!("{}[2J", 27 as char);
+        print!(".");
+        for _ in 0..SCREENSIZE_X {
+            print!("_")
         }
         
-        fn update_screen(bot_list: &Vec<Position>) {
-            let delay = time::Duration::from_millis(500);
-            //this is where the board updates from bot positions
-            print!("{}[2J", 27 as char);
-            print!(".");
-            for _ in 0..SCREENSIZE_X {
-                print!("_")
-            }
-            
-            let mut bot_found: bool = false;
-    
-            for y in 0..SCREENSIZE_Y {
-                println!("");
-                //print!("{}",SCREENSIZE_Y-y);
-                print!("|");
-                for x in 0..SCREENSIZE_X {
-                    bot_found = false;
-                    for i in 0..BOTAMOUNT {
-                        let bot = bot_list[i as usize];
-                        let posy = SCREENSIZE_Y - bot.y;
-                        let posx = bot.x;
-                        if posx == x && posy == y {
-                            print!("@");
-                            bot_found = true;
-                            break;
-                        }
-                    }
-                    if !bot_found {
-                        print!(".");
+        let mut bot_found: bool = false;
+        for y in 0..SCREENSIZE_Y {
+            println!("");
+            //print!("{}",SCREENSIZE_Y-y);
+            print!("|");
+            for x in 0..SCREENSIZE_X {
+                bot_found = false;
+                for bot in bot_list.iter() {    //runs check for every bot in bot_list
+                    let posy = SCREENSIZE_Y - bot.y;
+                    let posx = bot.x;
+                    if posx == x && posy == y {
+                        print!("@");
+                        bot_found = true;
                     }
                 }
+                if !bot_found {
+                    print!(".");
+                }
+                bot_found = false;
             }
-            println!();
-            thread::sleep(delay);
         }
+        println!();
+        thread::sleep(delay);
     }
-
    
-    let mut bot_list = vec![Position{x:0,y:0},Position{x:0,y:0}];
-    println!("{:?}",bot_list);
     
-
-    let mut game_on: bool = true;
-    let mut temp_game_on: bool = false;
-
-    while game_on == true {
-        if game_on != temp_game_on {
-            let bot1 = Position{x:rng.gen_range(0..SCREENSIZE_X),y:rng.gen_range(0..SCREENSIZE_Y)};
-            let bot2 = Position{x:rng.gen_range(0..SCREENSIZE_X),y:rng.gen_range(0..SCREENSIZE_Y)};
+    
+    let mut auto: bool = true;           //is bool for when auto is activated
+    let mut auto_check: bool = false;     //is for checking if auto was turned off
+    
+    //Terminal rendering
+    println!("{:?}",bot_list);
+    while auto == true {
+        if auto != auto_check {
+            let bot1 = Position{x:rng.gen_range(1..SCREENSIZE_X-1),y:rng.gen_range(1..SCREENSIZE_Y-1)};
+            let bot2 = Position{x:rng.gen_range(1..SCREENSIZE_X-1),y:rng.gen_range(1..SCREENSIZE_Y-1)};
             bot_list = vec![bot1,bot2];
         }
-        pathfinding(&bot_list);
-        
-        temp_game_on = game_on.clone();
+        bot_list = pathfinding(&bot_list);
+        println!("new: {:?}",&bot_list);
+
+        let mut s=String::new();
+        print!("Please enter some text: ");
+        let _=stdout().flush();
+        stdin().read_line(&mut s).expect("Did not enter a correct string");
+        if let Some('\n')=s.chars().next_back() {
+            s.pop();
+        }
+        if let Some('\r')=s.chars().next_back() {
+            s.pop();
+        }
+
+        if s == "end" {
+            auto = false
+        }
+        stdin().read_line(&mut String::new()).expect("Did not enter a correct string");
+
+        auto_check = auto.clone();
+        //auto = false
     }
 }
 
