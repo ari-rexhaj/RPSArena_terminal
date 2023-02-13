@@ -7,7 +7,7 @@ use rand::Rng;
 //constants
 const SCREENSIZE_X: i32 = 160; 
 const SCREENSIZE_Y: i32 = 45; 
-const SPEED: f64 = 0.9; 
+const SPEED: f64 = 0.0; 
 
 #[derive(Debug,Copy,Clone)]
 struct Position {
@@ -16,6 +16,7 @@ struct Position {
 }
 
 fn main() {
+    let delay = time::Duration::from_millis(250);
     let mut bot_list = vec![Position{x:0,y:0},Position{x:0,y:0}];
     let mut rng = rand::thread_rng();
 
@@ -28,7 +29,10 @@ fn main() {
             
             let bx = bot[1].x as f64;
             let by = bot[1].y as f64;
-            
+
+            let botx = 0.0;
+            let boty = 0.0;
+
             let bot = vec![Position{x:(SPEED*ax+bx-ax).round() as i32,y:(SPEED*ay+by-ay).round() as i32},Position{x:bx.round() as i32,y:by.round() as i32}];
             update_screen(&bot);
             println!("Hello from pathfinding!!");
@@ -36,7 +40,6 @@ fn main() {
     }
     
     fn update_screen(bot_list: &Vec<Position>) {
-        let delay = time::Duration::from_millis(250);
         //this is where the board updates from bot positions
 
         print!("{}[2J", 27 as char);
@@ -53,6 +56,7 @@ fn main() {
             for x in 0..SCREENSIZE_X {
                 bot_found = false;
                 for bot in bot_list.iter() {    //runs check for every bot in bot_list
+                    if bot_found == true {break}
                     let posy = SCREENSIZE_Y - bot.y;
                     let posx = bot.x;
                     if posx == x && posy == y {
@@ -60,16 +64,13 @@ fn main() {
                         bot_found = true;
                     }
                 }
-                if !bot_found {
-                    print!(".");
-                }
+                if !bot_found {print!(".")}
                 bot_found = false;
             }
         }
         println!();
-        thread::sleep(delay);
     }
-   
+    
     
     
     let mut auto: bool = true;           //is bool for when auto is activated
@@ -86,7 +87,7 @@ fn main() {
         let new_list = pathfinding(&bot_list);
         bot_list = new_list;
         println!("new: {:?}",&bot_list);
-
+        
         let mut s=String::new();
         print!("Please enter some text: ");
         let _=stdout().flush();
@@ -101,9 +102,9 @@ fn main() {
         if s == "end" {
             auto = false
         }
-        stdin().read_line(&mut String::new()).expect("Did not enter a correct string");
 
         auto_check = auto.clone();
+        thread::sleep(delay);
         //auto = false
     }
 }
