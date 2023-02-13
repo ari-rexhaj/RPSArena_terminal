@@ -24,16 +24,16 @@ fn main() {
     fn pathfinding(bot_list: &[Position]) -> Vec<Position> {
         let bot = bot_list;
         
-            let ax = bot[0].x as f64;
-            let ay = bot[0].y as f64;
+            let ax: f64 = bot[0].x as f64;
+            let ay: f64  = bot[0].y as f64;
             
-            let bx = bot[1].x as f64;
-            let by = bot[1].y as f64;
+            let bx: f64  = bot[1].x as f64;
+            let by: f64  = bot[1].y as f64;
 
-            let botx = 0.0;
-            let boty = 0.0;
+            let botx: f64 = 0.0;
+            let boty: f64 = 0.0;
 
-            let bot = vec![Position{x:(SPEED*ax+bx-ax).round() as i32,y:(SPEED*ay+by-ay).round() as i32},Position{x:bx.round() as i32,y:by.round() as i32}];
+            let bot = vec![Position{x:botx.round() as i32,y:boty.round() as i32},Position{x:bx.round() as i32,y:by.round() as i32}];
             update_screen(&bot);
             println!("Hello from pathfinding!!");
         return bot.to_vec();
