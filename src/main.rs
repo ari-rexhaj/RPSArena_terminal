@@ -21,11 +21,6 @@ fn main() {
 
     println!("Hello, world!");
     fn pathfinding(bot_list: &[Position]) -> Vec<Position> {
-
-        for i in bot_list.iter(){
-            println!("Hello from original bot_list {:?}",i)
-        }
-
         let bot = bot_list;
         
             let ax = bot[0].x as f64;
@@ -34,7 +29,6 @@ fn main() {
             let bx = bot[1].x as f64;
             let by = bot[1].y as f64;
             
-
             let bot = vec![Position{x:(SPEED*ax+bx-ax).round() as i32,y:(SPEED*ay+by-ay).round() as i32},Position{x:bx.round() as i32,y:by.round() as i32}];
             update_screen(&bot);
             println!("Hello from pathfinding!!");
@@ -42,7 +36,7 @@ fn main() {
     }
     
     fn update_screen(bot_list: &Vec<Position>) {
-        let delay = time::Duration::from_millis(500);
+        let delay = time::Duration::from_millis(250);
         //this is where the board updates from bot positions
 
         print!("{}[2J", 27 as char);
@@ -85,11 +79,12 @@ fn main() {
     println!("{:?}",bot_list);
     while auto == true {
         if auto != auto_check {
-            let bot1 = Position{x:rng.gen_range(1..SCREENSIZE_X-1),y:rng.gen_range(1..SCREENSIZE_Y-1)};
-            let bot2 = Position{x:rng.gen_range(1..SCREENSIZE_X-1),y:rng.gen_range(1..SCREENSIZE_Y-1)};
+            let bot1 = Position{x:rng.gen_range(1..SCREENSIZE_X),y:rng.gen_range(1..SCREENSIZE_Y)};
+            let bot2 = Position{x:rng.gen_range(1..SCREENSIZE_X),y:rng.gen_range(1..SCREENSIZE_Y)};
             bot_list = vec![bot1,bot2];
         }
-        bot_list = pathfinding(&bot_list);
+        let new_list = pathfinding(&bot_list);
+        bot_list = new_list;
         println!("new: {:?}",&bot_list);
 
         let mut s=String::new();
