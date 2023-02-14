@@ -7,7 +7,7 @@ use rand::Rng;
 //constants
 const SCREENSIZE_X: i32 = 350; 
 const SCREENSIZE_Y: i32 = 90; 
-const SPEED: f64 = 2.0; 
+const SPEED: f64 = 3.0; 
 
 #[derive(Debug,Copy,Clone,PartialEq)]
 struct Position {
@@ -30,8 +30,9 @@ fn main() {
         for i in 0..bot_list.len()-1 {
             let ax: f64 = bot[i].x as f64;
             let ay: f64 = bot[i].y as f64;
-            
-            let bx: f64 = bot[1].x as f64;  //Finn ny metode for å bestemme bot b (prøv å finn nærmeste for test, så seinere kan du skjekke om nærmeste er på lag og hvis ikke gå til neste nærmeste)
+
+            //Finn ny metode for å bestemme bot b (prøv å finn nærmeste for test, så seinere kan du skjekke om nærmeste er på lag og hvis ikke gå til neste nærmeste)
+            let bx: f64 = bot[1].x as f64;
             let by: f64 = bot[1].y as f64;
 
             let vector_x = bx-ax;
@@ -81,12 +82,13 @@ fn main() {
     
     
     
-    let mut auto: bool = true;           //is bool for when auto is activated
-    let mut auto_check: bool = false;     //is for checking if auto was turned off
+    let mut auto: bool = false;           //is bool for when auto is activated
+    let mut running = true;
+    let mut auto_check: bool = true;     //is for checking if auto was turned off
     
     //Terminal rendering
     println!("{:?}",bot_list);
-    while auto == true {
+    while running == true {
         if auto != auto_check {
             let bot1 = Position{x:rng.gen_range(1..SCREENSIZE_X),y:rng.gen_range(1..SCREENSIZE_Y)};
             let bot2 = Position{x:rng.gen_range(1..SCREENSIZE_X),y:rng.gen_range(1..SCREENSIZE_Y)};
@@ -96,24 +98,23 @@ fn main() {
         bot_list = new_list;
         println!("new: {:?}",&bot_list);
         
-        let mut s=String::new();
-        print!("Please enter some text: ");
-        let _=stdout().flush();
-        stdin().read_line(&mut s).expect("Did not enter a correct string");
-        if let Some('\n')=s.chars().next_back() {
-            s.pop();
-        }
-        if let Some('\r')=s.chars().next_back() {
-            s.pop();
-        }
+        if auto == false {
+            let mut s=String::new();
+            print!("command:  ");
+            let _=stdout().flush();
+            stdin().read_line(&mut s).expect("Did not enter a correct string");
+            if let Some('\n')=s.chars().next_back() {
+                s.pop();
+            }
+            if let Some('\r')=s.chars().next_back() {
+                s.pop();
+            }
 
-        if s == "end" {
-            auto = false
+            if s == "end" { running = false } else if s == "auto" { auto = true }
         }
 
         auto_check = auto.clone();
         thread::sleep(delay);
-        //auto = false
     }
 }
 
