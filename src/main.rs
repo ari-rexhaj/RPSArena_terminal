@@ -5,11 +5,11 @@ use std::{thread, time, vec, io::{stdin,stdout,Write},};
 
 use rand::Rng;
 //constants
-const SCREENSIZE_X: i32 = 160; 
-const SCREENSIZE_Y: i32 = 45; 
-const SPEED: f64 = 0.0; 
+const SCREENSIZE_X: i32 = 350; 
+const SCREENSIZE_Y: i32 = 90; 
+const SPEED: f64 = 2.0; 
 
-#[derive(Debug,Copy,Clone)]
+#[derive(Debug,Copy,Clone,PartialEq)]
 struct Position {
     x: i32,
     y: i32,
@@ -23,19 +23,27 @@ fn main() {
     println!("Hello, world!");
     fn pathfinding(bot_list: &[Position]) -> Vec<Position> {
         let bot = bot_list;
+        let mut botx: f64 = 0.0;
+        let mut boty: f64 = 0.0;
+        if bot[0] == bot[1] {update_screen(&bot.to_vec()); return bot.to_vec()}
         
-            let ax: f64 = bot[0].x as f64;
-            let ay: f64  = bot[0].y as f64;
+        for i in 0..bot_list.len()-1 {
+            let ax: f64 = bot[i].x as f64;
+            let ay: f64 = bot[i].y as f64;
             
-            let bx: f64  = bot[1].x as f64;
-            let by: f64  = bot[1].y as f64;
+            let bx: f64 = bot[1].x as f64;  //Finn ny metode for å bestemme bot b (prøv å finn nærmeste for test, så seinere kan du skjekke om nærmeste er på lag og hvis ikke gå til neste nærmeste)
+            let by: f64 = bot[1].y as f64;
 
-            let botx: f64 = 0.0;
-            let boty: f64 = 0.0;
-
-            let bot = vec![Position{x:botx.round() as i32,y:boty.round() as i32},Position{x:bx.round() as i32,y:by.round() as i32}];
-            update_screen(&bot);
-            println!("Hello from pathfinding!!");
+            let vector_x = bx-ax;
+            let vector_y = by-ay;
+            let vec = vec![(vector_x/((vector_x*vector_x+vector_y*vector_y).powf(0.5))),(vector_y/((vector_x*vector_x+vector_y*vector_y).powf(0.5)))];
+            botx = ax+vec[0]*SPEED;
+            boty = ay+vec[1]*SPEED;
+            
+        }
+        let bot = vec![Position{x:botx.round() as i32,y:boty.round() as i32},Position{x:bot[1].x,y:bot[1].y}];
+        println!("Hello from pathfinding!!");
+        update_screen(&bot);
         return bot.to_vec();
     }
     
