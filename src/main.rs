@@ -1,55 +1,78 @@
 #![allow(non_snake_case)]
 
-#![allow(unused_assignments)]
-use std::{thread, time, vec, io::{stdin,stdout,Write},};
-
+use std::{thread, time, vec, io::{stdin,stdout,Write}};
 use rand::Rng;
 //constants
 const SCREENSIZE_X: i32 = 350; 
 const SCREENSIZE_Y: i32 = 90; 
-const SPEED: f64 = 3.0; 
+const SPEED: f64 = 1.0; 
 
 #[derive(Debug,Copy,Clone,PartialEq)]
-struct Position {
-    x: i32,
-    y: i32,
+enum Team {
+    Misc = 0,
+    Rock = 1,
+    Paper = 2,
+    Scissors = 3,
 }
 
+#[derive(Debug,Copy,Clone,PartialEq)]
+struct Properties {
+    x: i32,
+    y: i32,
+    team: Team
+}
+
+
+
 fn main() {
-    let delay = time::Duration::from_millis(250);
-    let mut bot_list = vec![Position{x:0,y:0},Position{x:0,y:0}];
+    let delay = time::Duration::from_millis(200);
+    let mut bot_list = vec![Properties{x:0,y:0,team:Team::Misc},Properties{x:0,y:0,team:Team::Misc},Properties{x:0,y:0,team:Team::Misc}];
     let mut rng = rand::thread_rng();
 
     println!("Hello, world!");
-    fn pathfinding(bot_list: &[Position]) -> Vec<Position> {
-        let bot = bot_list;
+    fn movement(bot_list: &[Properties]) -> Vec<Properties> {
+        let mut bot = bot_list.to_vec();
+        let mut real_bot = vec![];
         let mut botx: f64 = 0.0;
         let mut boty: f64 = 0.0;
-        if bot[0] == bot[1] {update_screen(&bot.to_vec()); return bot.to_vec()}
-        
-        for i in 0..bot_list.len()-1 {
-            let ax: f64 = bot[i].x as f64;
-            let ay: f64 = bot[i].y as f64;
+        let mut bot2;
 
-            //Finn ny metode for å bestemme bot b (prøv å finn nærmeste for test, så seinere kan du skjekke om nærmeste er på lag og hvis ikke gå til neste nærmeste)
-            let bx: f64 = bot[1].x as f64;
-            let by: f64 = bot[1].y as f64;
-
-            let vector_x = bx-ax;
-            let vector_y = by-ay;
-            let vec = vec![(vector_x/((vector_x*vector_x+vector_y*vector_y).powf(0.5))),(vector_y/((vector_x*vector_x+vector_y*vector_y).powf(0.5)))];
-            botx = ax+vec[0]*SPEED;
-            boty = ay+vec[1]*SPEED;
+        for y in 0..bot_list.len()-1 {
+            let bot1 = bot[y];
             
+            let ax: f64 = bot1.x as f64;
+            let ay: f64 = bot1.y as f64;
+            
+            for x in 0..bot_list.len()-1 {
+                bot2 = bot[x];
+                if bot1 != bot2 {
+                    let radius = 0.0;
+                    let mut distance = ((bot2.x-bot1.x) as f64).powf(0.5)+((bot2.y-bot1.y) as f64).powf(0.5);
+                    if distance < 0.0 {distance *= -1.0}
+                    if radius <= distance {
+                        let bx = bot2.x as f64;
+                        let by = bot2.y as f64;
+
+                        let vector_x = bx-ax;
+                        let vector_y = by-ay;
+                        let vec = vec![(vector_x/((vector_x*vector_x+vector_y*vector_y).powf(0.5))),(vector_y/((vector_x*vector_x+vector_y*vector_y).powf(0.5)))];
+
+                        botx = ax+vec[0]*SPEED;
+                        boty = ay+vec[1]*SPEED;
+                        break;
+                    }   
+                }
+            }
+            
+            real_bot.append(&mut vec![Properties{x:botx.round() as i32,y:boty.round() as i32,team:Team::Misc}]);
+            bot.append(&mut vec![Properties{x:botx.round() as i32,y:boty.round() as i32,team:Team::Misc}]);
         }
-        let bot = vec![Position{x:botx.round() as i32,y:boty.round() as i32},Position{x:bot[1].x,y:bot[1].y}];
-        println!("Hello from pathfinding!!");
         update_screen(&bot);
-        return bot.to_vec();
+        return real_bot.to_vec()
     }
     
-    fn update_screen(bot_list: &Vec<Position>) {
-        //this is where the board updates from bot positions
+    fn update_screen(bot_list: &Vec<Properties>) {
+        //this is where the board updates from bot Propertiess
 
         print!("{}[2J", 27 as char);
         print!(".");
@@ -57,7 +80,7 @@ fn main() {
             print!("_")
         }
         
-        let mut bot_found: bool = false;
+        let mut bot_found: bool;
         for y in 0..SCREENSIZE_Y {
             println!("");
             //print!("{}",SCREENSIZE_Y-y);
@@ -74,12 +97,10 @@ fn main() {
                     }
                 }
                 if !bot_found {print!(".")}
-                bot_found = false;
             }
         }
         println!();
     }
-    
     
     
     let mut auto: bool = false;           //is bool for when auto is activated
@@ -90,11 +111,12 @@ fn main() {
     println!("{:?}",bot_list);
     while running == true {
         if auto != auto_check {
-            let bot1 = Position{x:rng.gen_range(1..SCREENSIZE_X),y:rng.gen_range(1..SCREENSIZE_Y)};
-            let bot2 = Position{x:rng.gen_range(1..SCREENSIZE_X),y:rng.gen_range(1..SCREENSIZE_Y)};
+            let bot1 = Properties{x:rng.gen_range(1..SCREENSIZE_X),y:rng.gen_range(1..SCREENSIZE_Y),team:Team::Misc};
+            let bot2 = Properties{x:rng.gen_range(1..SCREENSIZE_X),y:rng.gen_range(1..SCREENSIZE_Y),team:Team::Misc};
             bot_list = vec![bot1,bot2];
         }
-        let new_list = pathfinding(&bot_list);
+
+        let new_list = movement(&bot_list);
         bot_list = new_list;
         println!("new: {:?}",&bot_list);
         
@@ -109,10 +131,8 @@ fn main() {
             if let Some('\r')=s.chars().next_back() {
                 s.pop();
             }
-
             if s == "end" { running = false } else if s == "auto" { auto = true }
         }
-
         auto_check = auto.clone();
         thread::sleep(delay);
     }
