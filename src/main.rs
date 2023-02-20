@@ -22,53 +22,50 @@ struct Properties {
     team: Team
 }
 
-
-
 fn main() {
     let delay = time::Duration::from_millis(200);
-    let mut bot_list = vec![Properties{x:0,y:0,team:Team::Misc},Properties{x:0,y:0,team:Team::Misc},Properties{x:0,y:0,team:Team::Misc}];
+    let mut bot_list = vec![];
     let mut rng = rand::thread_rng();
 
     println!("Hello, world!");
     fn movement(bot_list: &[Properties]) -> Vec<Properties> {
-        let mut bot = bot_list.to_vec();
+        let mut bot = vec![];
         let mut real_bot = vec![];
-        let mut botx: f64 = 0.0;
-        let mut boty: f64 = 0.0;
-        let mut bot2;
+        let mut botx: f64;
+        let mut boty: f64;
 
-        for y in 0..bot_list.len()-1 {
-            let bot1 = bot[y];
-            
+        let mut closest_bot: &Properties = &bot_list[0];
+        for bot1 in bot_list.iter() {
             let ax: f64 = bot1.x as f64;
             let ay: f64 = bot1.y as f64;
-            
-            for x in 0..bot_list.len()-1 {
-                bot2 = bot[x];
-                if bot1 != bot2 {
-                    let radius = 0.0;
-                    let mut distance = ((bot2.x-bot1.x) as f64).powf(0.5)+((bot2.y-bot1.y) as f64).powf(0.5);
-                    if distance < 0.0 {distance *= -1.0}
-                    if radius <= distance {
-                        let bx = bot2.x as f64;
-                        let by = bot2.y as f64;
 
-                        let vector_x = bx-ax;
-                        let vector_y = by-ay;
-                        let vec = vec![(vector_x/((vector_x*vector_x+vector_y*vector_y).powf(0.5))),(vector_y/((vector_x*vector_x+vector_y*vector_y).powf(0.5)))];
-
-                        botx = ax+vec[0]*SPEED;
-                        boty = ay+vec[1]*SPEED;
-                        break;
-                    }   
+            let mut closest_dis:f64 = 1000.0;
+            for bot2 in bot_list.iter() {  //this method for finding the closest bot is not pretty but i just want to make a proof of concept for now and maybe change it later
+                let mut distance = ((bot1.x-bot2.x) as f64).powf(0.5)+((bot1.y-bot2.y) as f64).powf(0.5);
+                if distance < 0.0 {distance *= -1.0}
+                if bot1 != bot2 && distance < closest_dis {
+                    closest_bot = bot2;
+                    closest_dis = distance;
+                    println!("new closest found: {:?}",closest_bot);
                 }
             }
             
+            let bx = closest_bot.x as f64;
+            let by = closest_bot.y as f64;
+
+            let vector_x = bx-ax;
+            let vector_y = by-ay;
+            let vec = vec![(vector_x/((vector_x*vector_x+vector_y*vector_y).powf(0.5))),(vector_y/((vector_x*vector_x+vector_y*vector_y).powf(0.5)))];
+
+            botx = ax+vec[0]*SPEED;
+            boty = ay+vec[1]*SPEED;
+
             real_bot.append(&mut vec![Properties{x:botx.round() as i32,y:boty.round() as i32,team:Team::Misc}]);
             bot.append(&mut vec![Properties{x:botx.round() as i32,y:boty.round() as i32,team:Team::Misc}]);
         }
-        update_screen(&bot);
-        return real_bot.to_vec()
+
+            update_screen(&bot);
+            return real_bot.to_vec()
     }
     
     fn update_screen(bot_list: &Vec<Properties>) {
@@ -111,9 +108,10 @@ fn main() {
     println!("{:?}",bot_list);
     while running == true {
         if auto != auto_check {
-            let bot1 = Properties{x:rng.gen_range(1..SCREENSIZE_X),y:rng.gen_range(1..SCREENSIZE_Y),team:Team::Misc};
-            let bot2 = Properties{x:rng.gen_range(1..SCREENSIZE_X),y:rng.gen_range(1..SCREENSIZE_Y),team:Team::Misc};
-            bot_list = vec![bot1,bot2];
+            for _ in 0..5 {
+                let bot = Properties{x:rng.gen_range(1..SCREENSIZE_X),y:rng.gen_range(1..SCREENSIZE_Y),team:Team::Misc};
+                bot_list.append(&mut vec![bot]);
+            }
         }
 
         let new_list = movement(&bot_list);
