@@ -33,7 +33,7 @@ fn main() {
     let map = (160.0,45.0);                                                 //dimensions of map
     let mut bot_list: Vec<Bot> = vec![];
 
-    for _ in 0..2000 {                                                                     // generates bots
+    for _ in 0..250 {                                                                     // generates bots
         let xpos = rng.gen_range(0.0..map.0);
         let ypos = rng.gen_range(0.0..map.1);
         let mut bot_team = Team::Rock;
