@@ -1,5 +1,6 @@
 use rand::prelude::*;
 use std::io::{stdin,stdout,Write};
+use std::{process::Command,thread,time};
 
 #[derive(Debug,Copy,Clone,PartialEq)]
 enum Team {
@@ -71,41 +72,44 @@ fn main() {
     }
 
     while game == true {
-
+        clear_terminal_screen();
+        
         let mut rock_count:u16 = 0;
         let mut paper_count:u16 = 0;
         let mut scissors_count:u16 = 0;
-
+        
         for bot in &bot_list {
-
+            
             match bot.team {
                 Team::Rock => rock_count += 1,
                 Team::Paper => paper_count += 1,
                 Team::Scissors => scissors_count += 1,
             }
         }
-
-
-        println!("rocks: {0} | papers: {1} | scissors: {2}",rock_count,paper_count,scissors_count);
-
+        
+        println!("map x: {0} | map y: {1}",map.0,map.1);
+        println!("rocks: {0} | papers: {1} | scissors: {2} | total: {3}",rock_count,paper_count,scissors_count,(rock_count+paper_count+scissors_count));
+        
         //for bot in &bot_list {
         //    println!("{:?}",bot.map_pos())
         //}
-
+        
         generate_map(bot_list.clone(),map);
-
+        
         let mut input=String::new();
         print!("input: ");
         let _=stdout().flush();
+        
         stdin().read_line(&mut input).expect("Did not enter a correct string");
-
+        
         if let Some('\n')=input.chars().next_back() {input.pop();}
         if let Some('\r')=input.chars().next_back() {input.pop();}
-
+        
         if input == "exit" {game = false}
-
+        
         bot_list = next_turn(bot_list);
-
+        
+        thread::sleep(time::Duration::from_millis(30));
     }
 }
 
@@ -164,4 +168,21 @@ fn next_turn(old_bot_list: Vec<Bot>) -> Vec<Bot> {
         new_bot_list.push(new_bot1);
     }
     return new_bot_list
+}
+
+pub fn clear_terminal_screen() {
+    if cfg!(target_os = "windows") {
+        Command::new("cmd")
+            .args(["/c", "cls"])
+            .spawn()
+            .expect("cls command failed to start")
+            .wait()
+            .expect("failed to wait");
+    } else {
+        Command::new("clear")
+            .spawn()
+            .expect("clear command failed to start")
+            .wait()
+            .expect("failed to wait");
+    };
 }
