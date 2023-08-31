@@ -23,6 +23,23 @@ impl Bot {
     fn map_pos(&self) -> (u32,u32) {
         (self.x.round() as u32,self.y.round() as u32)
     }
+
+    fn chase(&self) -> Team {
+        match self.team{
+            Team::Rock => Team::Scissors,
+            Team::Paper => Team::Rock,
+            Team::Scissors => Team::Paper
+        }
+    }
+    
+    fn distance(&self,bot2:Bot) -> (f32,f32,f32) {
+    
+        let dist_x = bot2.x-self.x;
+        let dist_y = bot2.y-self.y;
+        let dist_points = f32::sqrt((dist_x)*(dist_x)+(dist_y)*(dist_y));
+    
+        return (dist_points,dist_x,dist_y)
+    }
 }
 
 
@@ -30,10 +47,10 @@ fn main() {
     let mut rng = rand::thread_rng();
     let mut game = true;
 
-    let map = (160.0,45.0);                                                 //dimensions of map
+    let map = (100.0,40.0);                                                 //dimensions of map
     let mut bot_list: Vec<Bot> = vec![];
 
-    for _ in 0..250 {                                                                     // generates bots
+    for _ in 0..200 {                                                                     // generates bots
         let xpos = rng.gen_range(0.0..map.0);
         let ypos = rng.gen_range(0.0..map.1);
         let mut bot_team = Team::Rock;
@@ -126,8 +143,8 @@ fn next_turn(old_bot_list: Vec<Bot>) -> Vec<Bot> {
         closest_dist = (1000.0,0.0,0.0);
         for bot2 in new_bot_list.iter_mut() {  //saves bot 2, this bot will cycle through all the bots and calculate the distance between them to figure out where bot 1 should move (towards the closest bot in bot list)
             
-            if (bot1 != *bot2) && (chase(bot1.team) == bot2.team) {
-                dist = distance(bot1, *bot2);
+            if (bot1 != *bot2) && (bot1.chase() == bot2.team) {
+                dist = bot1.distance(*bot2);
                 
                 if dist.0 < closest_dist.0 {
                     closest_dist = dist.clone();
@@ -147,21 +164,4 @@ fn next_turn(old_bot_list: Vec<Bot>) -> Vec<Bot> {
         new_bot_list.push(new_bot1);
     }
     return new_bot_list
-}
-
-fn chase(own_team:Team) -> Team {
-    match own_team{
-        Team::Rock => Team::Scissors,
-        Team::Paper => Team::Rock,
-        Team::Scissors => Team::Paper
-    }
-}
-
-fn distance(bot1: Bot,bot2:Bot) -> (f32,f32,f32) {
-
-    let dist_x = bot2.x-bot1.x;
-    let dist_y = bot2.y-bot1.y;
-    let dist_points = f32::sqrt((dist_x)*(dist_x)+(dist_y)*(dist_y));
-
-    return (dist_points,dist_x,dist_y)
 }
