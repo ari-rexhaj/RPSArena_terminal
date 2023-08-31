@@ -48,10 +48,12 @@ fn main() {
     let mut rng = rand::thread_rng();
     let mut game = true;
 
-    let map = (100.0,40.0);                                                 //dimensions of map
+    let map = (100.0,40.0);//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - dimensions of map
     let mut bot_list: Vec<Bot> = vec![];
 
-    for _ in 0..200 {                                                                     // generates bots
+
+    let bot_amount = 200;// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - generates bots
+    for _ in 0..bot_amount {
         let xpos = rng.gen_range(0.0..map.0);
         let ypos = rng.gen_range(0.0..map.1);
         let mut bot_team = Team::Rock;
