@@ -33,7 +33,7 @@ fn main() {
     let map = (160.0,45.0);                                                 //dimensions of map
     let mut bot_list: Vec<Bot> = vec![];
 
-    for _ in 0..4 {                                                                     // generates bots
+    for _ in 0..2000 {                                                                     // generates bots
         let xpos = rng.gen_range(0.0..map.0);
         let ypos = rng.gen_range(0.0..map.1);
         let mut bot_team = Team::Rock;
@@ -54,9 +54,26 @@ fn main() {
     }
 
     while game == true {
+
+        let mut rock_count:u16 = 0;
+        let mut paper_count:u16 = 0;
+        let mut scissors_count:u16 = 0;
+
         for bot in &bot_list {
-            println!("{:?}",bot.map_pos());
+
+            match bot.team {
+                Team::Rock => rock_count += 1,
+                Team::Paper => paper_count += 1,
+                Team::Scissors => scissors_count += 1,
+            }
         }
+
+
+        println!("rocks: {0} | papers: {1} | scissors: {2}",rock_count,paper_count,scissors_count);
+
+        //for bot in &bot_list {
+        //    println!("{:?}",bot.map_pos())
+        //}
 
         generate_map(bot_list.clone(),map);
 
@@ -104,40 +121,30 @@ fn next_turn(old_bot_list: Vec<Bot>) -> Vec<Bot> {
 
     let mut dist:(f32,f32,f32); //saves the distance, x component of distance and y component of distance
     let mut closest_dist:(f32,f32,f32);
-    let mut closest_bot:Bot;
 
-    for bot1 in new_bot_list.clone() {  //saves bot 1, the bot that will be moved
+    for bot1 in old_bot_list {  //saves bot 1, the bot that will be moved
         closest_dist = (1000.0,0.0,0.0);
-        closest_bot = bot1;
-        for bot2 in old_bot_list.clone() {  //saves bot 2, this bot will cycle through all the bots and calculate the distance between them to figure out where bot 1 should move (towards the closest bot in bot list)
+        for bot2 in new_bot_list.iter_mut() {  //saves bot 2, this bot will cycle through all the bots and calculate the distance between them to figure out where bot 1 should move (towards the closest bot in bot list)
             
-            if (bot1 != bot2) && (chase(bot1.team) == bot2.team) {
-                dist = distance(bot1, bot2);
+            if (bot1 != *bot2) && (chase(bot1.team) == bot2.team) {
+                dist = distance(bot1, *bot2);
                 
                 if dist.0 < closest_dist.0 {
                     closest_dist = dist.clone();
-                    closest_bot = bot2;
-                    if dist.0 < 1.0 {        
-                        // if bot2 is less than 1 distance away, remove from new_bot_list and replace with copy of self with new team
+                    if dist.0 < f32::sqrt(3.0) {
+                        bot2.team = bot1.team
                     }
                 }
             }
-            //else {continue;}
         }
+
         let mut new_bot1 = bot1.clone();
         
         new_bot1.x = bot1.x + closest_dist.1/closest_dist.0;  //code for moving x
         new_bot1.y = bot1.y + closest_dist.2/closest_dist.0;  //code for moving y
         
-        if new_bot1.map_pos() != closest_bot.map_pos() {      // seems theres a bug where 2 bots on the same team can still move on top of eachother, oh well!
-            new_bot_list.remove(0);
-            new_bot_list.push(new_bot1);
-        }
-        else {
-            new_bot_list.remove(0);
-            new_bot_list.push(bot1)
-        }
-
+        new_bot_list.remove(0);
+        new_bot_list.push(new_bot1);
     }
     return new_bot_list
 }
