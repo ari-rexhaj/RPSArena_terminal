@@ -61,7 +61,7 @@ fn main() {
             0 => bot_team = Team::Rock,
             1 => bot_team = Team::Paper,
             2 => bot_team = Team::Scissors,
-            _ => println!("Some shit that should never happen happened at bot generation")
+            _ => println!("how could dis happen? - heavy tf2")
         }
 
         let temp_bot = Bot{
