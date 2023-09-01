@@ -1,5 +1,6 @@
 use rand::prelude::*;
 use std::io::{stdin,stdout,Write};
+use std::ops::Add;
 use std::{process::Command,thread,time};
 
 #[derive(Debug,Copy,Clone,PartialEq)]
@@ -17,10 +18,6 @@ struct Bot {
 }
 
 impl Bot {
-    fn real_pos(&self) -> (f32,f32) {
-        (self.x,self.y)
-    }
-
     fn map_pos(&self) -> (u32,u32) {
         (self.x.round() as u32,self.y.round() as u32)
     }
@@ -43,16 +40,10 @@ impl Bot {
     }
 }
 
-
-fn main() {
+fn generate_bots(map:(f32,f32),bot_amount:i32) -> Vec<Bot> {
     let mut rng = rand::thread_rng();
-    let mut game = true;
+    let mut bot_list = vec![];
 
-    let map = (100.0,40.0);//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - dimensions of map
-    let mut bot_list: Vec<Bot> = vec![];
-
-
-    let bot_amount = 200;// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - generates bots
     for _ in 0..bot_amount {
         let xpos = rng.gen_range(0.0..map.0);
         let ypos = rng.gen_range(0.0..map.1);
@@ -72,10 +63,22 @@ fn main() {
 
         bot_list.push(temp_bot)
     }
+    return bot_list
+}
 
-    while game == true {
-        clear_terminal_screen();
-        
+
+fn main() {
+    let mut game = true;
+
+    let mut map = (100.0,40.0);//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - dimensions of map
+    let mut bot_amount = 200;
+    let mut bot_list: Vec<Bot> = generate_bots(map,bot_amount);
+ 
+    let mut speed = 10; 
+    let mut auto = 0;
+    let mut update = false;
+
+    while game == true {        
         let mut rock_count:u16 = 0;
         let mut paper_count:u16 = 0;
         let mut scissors_count:u16 = 0;
@@ -89,34 +92,99 @@ fn main() {
             }
         }
         
-        println!("map x: {0} | map y: {1}",map.0,map.1);
-        println!("rocks: {0} | papers: {1} | scissors: {2} | total: {3}",rock_count,paper_count,scissors_count,(rock_count+paper_count+scissors_count));
+        if update == true {
+            generate_map(bot_list.clone(),map);
+            println!("map x: {0} | map y: {1}",map.0,map.1);
+            println!("rocks: {0} | papers: {1} | scissors: {2} | total: {3} \n",rock_count,paper_count,scissors_count,(rock_count+paper_count+scissors_count));
+        }
+        else {
+            clear_terminal_screen();
+            println!("\nwelcome to RPSArena!!!\nmade by urs truly the awsome aARi rexxhaj!!!!\n\ntype help for commands");
+            update = true
+        }
         
-        //for bot in &bot_list {
-        //    println!("{:?}",bot.map_pos())
-        //}
-        
-        generate_map(bot_list.clone(),map);
-        
-        let mut input=String::new();
-        print!("input: ");
-        let _=stdout().flush();
-        
-        stdin().read_line(&mut input).expect("Did not enter a correct string");
-        
-        if let Some('\n')=input.chars().next_back() {input.pop();}
-        if let Some('\r')=input.chars().next_back() {input.pop();}
-        
-        if input == "exit" {game = false}
+        if auto <= 0 {   
+            let mut input=String::new();
+            print!("command: ");
+            let _=stdout().flush();
+            
+            stdin().read_line(&mut input).expect("Did not enter a correct string");
+            
+            if let Some('\n')=input.chars().next_back() {input.pop();}
+            if let Some('\r')=input.chars().next_back() {input.pop();}
+            
+            if input == "exit" {game = false}
+            else if input.contains("delay")  {          // sets the delay
+                for _ in 0..6 {
+                    input.remove(0);
+                }
+                speed = input.parse().unwrap()
+            }
+            
+            else if input.contains("autoplay") {        // turns on autoplay
+                for _ in 0..9 {
+                    input.remove(0);
+                }
+                auto = input.parse().unwrap()
+            }
+
+            else if input.contains("reset") {           //respawns bot
+                bot_list = generate_bots(map,bot_amount)
+            }
+
+            else if input.contains("mapx") {            //changes mapx value and resets
+                for _ in 0..5 {
+                    input.remove(0);
+                }
+                map.0 = input.parse().unwrap();
+                bot_list = generate_bots(map,bot_amount)
+
+            }
+
+            else if input.contains("mapy") {            // changes mapy value and resets
+                for _ in 0..5 {
+                    input.remove(0);
+                }
+                map.1 = input.parse().unwrap();
+                bot_list = generate_bots(map,bot_amount)
+            }
+
+            else if input.contains("bot amount") {            // changes mapy value and resets
+                for _ in 0..11 {
+                    input.remove(0);
+                }
+                bot_amount = input.parse().unwrap();
+                bot_list = generate_bots(map,bot_amount)
+            }
+
+
+            else if input.contains("help") {            // changes mapy value and resets
+                update = false;
+                println!("commands:\n
+    delay u32       changes how long the loop waits until next update
+    autoplay u32    automatically plays <n> amount of turns
+    reset           respawns bots
+    mapx u32        changes mapx value and respawns bots
+    mapy u32        changes mapy value and respawns bots
+    bot amount u32  changes amount of bots and respawns bots
+    exit            stops the script\n
+    these commands are very case sensetive and one mistake may throw exception\n")
+            }
+        }
+        else { 
+            println!("auto turns left: {}",auto);
+            auto -= 1 
+        }
         
         bot_list = next_turn(bot_list);
         
-        thread::sleep(time::Duration::from_millis(30));
+        thread::sleep(time::Duration::from_millis(speed));
     }
 }
 
 fn generate_map(bot_list: Vec<Bot>,map:(f32,f32)) {
     let mut bot_found;
+    let mut string_map:String = "".to_string();
 
     for y in (0..(map.1+1.0) as u32).rev() {        //Generates Y lane, this is reversed because print pushed old prints on top of self, so to counter this and make the bottom left corner == (0,0), we reverse the loop
         for x in 0..(map.0+1.0) as u32 {            //Generates X lane, technically Y lane is never generated but is made automatically because only X lanes are made and stacked on top of eachother on the terminal
@@ -125,17 +193,19 @@ fn generate_map(bot_list: Vec<Bot>,map:(f32,f32)) {
                 if bot.map_pos() == (x,y) && !bot_found {
                     bot_found = true;
                     match bot.team {
-                        Team::Rock => print!("R"),
-                        Team::Paper => print!("P"),
-                        Team::Scissors => print!("S")
+                        Team::Rock => string_map = string_map.add("R"),
+                        Team::Paper => string_map = string_map.add("P"),
+                        Team::Scissors =>  string_map = string_map.add("S")
                     }
                 }
             }
-            if !bot_found {print!(".")}
+            if !bot_found { string_map = string_map.add(".")}
             //println!("{:?}x {:?}y",x,y)
         }
-        println!()
+        string_map = string_map.add("\n")
     }
+    clear_terminal_screen();
+    println!("{}",string_map)
 }
 
 fn next_turn(old_bot_list: Vec<Bot>) -> Vec<Bot> {
