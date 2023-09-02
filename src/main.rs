@@ -68,6 +68,9 @@ fn generate_bots(map:(f32,f32),bot_amount:i32) -> Vec<Bot> {
 
 
 fn main() {
+    clear_terminal_screen();
+    println!("\nwelcome to RPSArena!!!\nmade by urs truly the awsome aARi rexxhaj!!!!\n\ntype help for commands");
+
     let mut game = true;
 
     let mut map = (100.0,40.0);//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - dimensions of map
@@ -98,14 +101,16 @@ fn main() {
             println!("rocks: {0} | papers: {1} | scissors: {2} | total: {3} \n",rock_count,paper_count,scissors_count,(rock_count+paper_count+scissors_count));
         }
         else {
-            clear_terminal_screen();
-            println!("\nwelcome to RPSArena!!!\nmade by urs truly the awsome aARi rexxhaj!!!!\n\ntype help for commands");
             update = true
         }
         
-        if auto <= 0 {   
+        if auto > 0 {   // aka if auto is not 0 but written so even if the program somehow jumped from 1 to -1, the code would still stop
+            println!("auto turns left: {}",auto);
+            auto -= 1 
+        }
+        else { 
             let mut input=String::new();
-            print!("command: ");
+            print!(">");
             let _=stdout().flush();
             
             stdin().read_line(&mut input).expect("Did not enter a correct string");
@@ -149,7 +154,7 @@ fn main() {
                 bot_list = generate_bots(map,bot_amount)
             }
 
-            else if input.contains("bot amount") {            // changes mapy value and resets
+            else if input.contains("bot_amount") {            // changes mapy value and resets
                 for _ in 0..11 {
                     input.remove(0);
                 }
@@ -157,27 +162,21 @@ fn main() {
                 bot_list = generate_bots(map,bot_amount)
             }
 
-
             else if input.contains("help") {            // changes mapy value and resets
                 update = false;
-                println!("commands:\n
-    delay u32       changes how long the loop waits until next update
-    autoplay u32    automatically plays <n> amount of turns
+                println!("\ncommands:\n
+    delay int       changes how long the loop waits until next update
+    autoplay int    automatically plays <n> amount of turns
     reset           respawns bots
-    mapx u32        changes mapx value and respawns bots
-    mapy u32        changes mapy value and respawns bots
-    bot amount u32  changes amount of bots and respawns bots
+    mapx int        changes mapx value and respawns bots
+    mapy int        changes mapy value and respawns bots
+    bot_amount int  changes amount of bots and respawns bots
     exit            stops the script\n
     these commands are very case sensetive and one mistake may throw exception\n")
             }
+
         }
-        else { 
-            println!("auto turns left: {}",auto);
-            auto -= 1 
-        }
-        
         bot_list = next_turn(bot_list);
-        
         thread::sleep(time::Duration::from_millis(speed));
     }
 }
