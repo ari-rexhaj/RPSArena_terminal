@@ -273,36 +273,32 @@ fn next_turn(grid: HashMap<(i32,i32),Bot>) -> HashMap<(i32,i32),Bot> {
             new_grid.insert(pos,new_bot1);
         }
 
+        let mut infected = false;
+        if infected == false && new_grid.contains_key(&(new_bot1.map_pos().0-1,new_bot1.map_pos().1)) && new_grid[&(new_bot1.map_pos().0-1,new_bot1.map_pos().1)].chase() == new_bot1.team {     // checks left for enemy bot 
+            println!("left spread attempted");
+            new_bot1.team =  new_grid[&(new_bot1.map_pos().0-1,new_bot1.map_pos().1)].team;
+            new_grid.insert(new_bot1.map_pos(),new_bot1);
+            infected = true
+        } 
 
-        let mut enemy_bot:Bot; 
-        if closest_dist.0 <= f32::sqrt(2.0) {
-            if new_grid.contains_key(&(new_bot1.map_pos().0-1,new_bot1.map_pos().1)) && new_grid[&(new_bot1.map_pos().0-1,new_bot1.map_pos().1)].team == new_bot1.chase() {     // checks left for enemy bot 
-                println!("left take attempted");
-                enemy_bot = new_grid[&(new_bot1.map_pos().0-1,new_bot1.map_pos().1)];
-                enemy_bot.team = new_bot1.team;
-                new_grid.insert(enemy_bot.map_pos(),enemy_bot);
-            } //Checks left of bot
+        if infected == false && new_grid.contains_key(&(new_bot1.map_pos().0+1,new_bot1.map_pos().1)) && new_grid[&(new_bot1.map_pos().0+1,new_bot1.map_pos().1)].chase() == new_bot1.team {     // checks right for enemy bot 
+            println!("right spread attempted");
+            new_bot1.team =  new_grid[&(new_bot1.map_pos().0+1,new_bot1.map_pos().1)].team;
+            new_grid.insert(new_bot1.map_pos(),new_bot1);
+            infected = true   
+        } 
 
-            if new_grid.contains_key(&(new_bot1.map_pos().0+1,new_bot1.map_pos().1)) && new_grid[&(new_bot1.map_pos().0+1,new_bot1.map_pos().1)].team == new_bot1.chase() {     // checks right for enemy bot 
-                println!("right take attempted");
-                enemy_bot = new_grid[&(new_bot1.map_pos().0+1,new_bot1.map_pos().1)];
-                enemy_bot.team = new_bot1.team;
-                new_grid.insert(enemy_bot.map_pos(),enemy_bot);
-            } //Checks left of bot
+        if infected == false && new_grid.contains_key(&(new_bot1.map_pos().1-1,new_bot1.map_pos().1)) && new_grid[&(new_bot1.map_pos().1-1,new_bot1.map_pos().1)].chase() == new_bot1.team {     // checks down for enemy bot 
+            println!("down spread attempted");
+            new_bot1.team =  new_grid[&(new_bot1.map_pos().1-1,new_bot1.map_pos().1)].team;
+            new_grid.insert(new_bot1.map_pos(),new_bot1);
+            infected = true
+        } 
 
-            if new_grid.contains_key(&(new_bot1.map_pos().1-1,new_bot1.map_pos().1)) && new_grid[&(new_bot1.map_pos().1-1,new_bot1.map_pos().1)].team == new_bot1.chase() {     // checks down for enemy bot 
-                println!("down take attempted");
-                enemy_bot = new_grid[&(new_bot1.map_pos().1-1,new_bot1.map_pos().1)];
-                enemy_bot.team = new_bot1.team;
-                new_grid.insert(enemy_bot.map_pos(),enemy_bot);
-            } //Checks left of bot
-
-            if new_grid.contains_key(&(new_bot1.map_pos().1+1,new_bot1.map_pos().1)) && new_grid[&(new_bot1.map_pos().1+1,new_bot1.map_pos().1)].team == new_bot1.chase() {     // checks up for enemy bot 
-                println!("up take attempted");
-                enemy_bot = new_grid[&(new_bot1.map_pos().1+1,new_bot1.map_pos().1)];
-                enemy_bot.team = new_bot1.team;
-                new_grid.insert(enemy_bot.map_pos(),enemy_bot);
-            } //Checks left of bot
+        if infected == false && new_grid.contains_key(&(new_bot1.map_pos().1+1,new_bot1.map_pos().1)) && new_grid[&(new_bot1.map_pos().1+1,new_bot1.map_pos().1)].chase() == new_bot1.team {     // checks up for enemy bot 
+            println!("up spread attempted");
+            new_bot1.team =  new_grid[&(new_bot1.map_pos().1+1,new_bot1.map_pos().1)].team;
+            new_grid.insert(new_bot1.map_pos(),new_bot1);
         }
     }
     return new_grid
