@@ -98,7 +98,7 @@ fn main() {
         if update == true {
             generate_map(bot_list.clone(),map);
             println!("map x: {0} | map y: {1}",map.0,map.1);
-            println!("rocks: {0} | papers: {1} | scissors: {2} | total: {3} \n",rock_count,paper_count,scissors_count,(rock_count+paper_count+scissors_count));
+            println!("\x1b[91mrocks:\x1b[0m {0} | \x1b[92mpapers:\x1b[0m {1} | \x1b[94mscissors:\x1b[0m {2} | total: {3} \n",rock_count,paper_count,scissors_count,(rock_count+paper_count+scissors_count));
         }
         else {
             update = true
@@ -192,9 +192,9 @@ fn generate_map(bot_list: Vec<Bot>,map:(f32,f32)) {
                 if bot.map_pos() == (x,y) && !bot_found {
                     bot_found = true;
                     match bot.team {
-                        Team::Rock => string_map = string_map.add("R"),
-                        Team::Paper => string_map = string_map.add("P"),
-                        Team::Scissors =>  string_map = string_map.add("S")
+                        Team::Rock => string_map = string_map.add("\x1b[101mR\x1b[0m"),
+                        Team::Paper => string_map = string_map.add("\x1b[102mP\x1b[0m"),
+                        Team::Scissors =>  string_map = string_map.add("\x1b[104mS\x1b[0m")
                     }
                 }
             }
